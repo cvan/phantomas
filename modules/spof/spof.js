@@ -7,6 +7,47 @@
 exports.version = '0.1';
 
 exports.module = function(phantomas) {
+	function spofCheck(html) {
+		var spofRegex = /<script [^>]*src[ =htps:"']+\/\/([^\/ "]+)\/[^>]+>/gi,
+			matches = html.match(spofRegex),
+			res = [];
+
+		if (matches) {
+			matches.forEach(function(match) {
+				console.log(JSON.stringify(match));
+			});
+		}
+
+		return res;
+	}
+
+	// fetch HTML using curl
+	// requires:
+	// - *nix system
+	// - PhantomJS 1.9+
+	// - curl
+	// @see https://github.com/ariya/phantomjs/commit/f52044cd31
+	var execFile;
+
+	try {
+		execFile = require("child_process").execFile;
+	}
+	catch(e) {
+		return;
+	}
+
+	phantomas.log("Fetching <" + phantomas.url + "> using curl to perform SPOF analysis...");
+	phantomas.setMetric('spof');
+
+	execFile("curl", ['--location' /* follow redirects */, phantomas.url], null, function(err, stdout, stderr) {
+		if (err === null) {
+			phantomas.log("Page HTML received");
+
+			// perform SPOF analysis
+			var spofs = spofCheck(stdout);
+		}
+	});
+
 	// Determining the top-level-domain for a given host is way too complex to do right
 	// (you need a full list of them basically)
 	// We are going to simplify it and assume anything that is .co.xx will have 3 parts
@@ -27,13 +68,4 @@ exports.module = function(phantomas) {
 
 	// list of in-home domains
 	var myDomains = {};
-/**
-	phantomas.on('init', function() {
-		console.log(phantomas.getPageContent());
-	});
-
-	phantomas.on('loadFinished', function() {
-		console.log(phantomas.getPageContent());
-	});
-**/
 };
