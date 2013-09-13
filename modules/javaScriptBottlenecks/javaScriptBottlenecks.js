@@ -23,7 +23,7 @@ exports.module = function(phantomas) {
 					// spy calls to eval()
 					phantomas.spy(window, 'eval', function(code) {
 						report('eval() called directly', phantomas.getCaller(), phantomas.getBacktrace(), 'evalCalls');
-						phantomas.log('eval\'ed code: ' + (code || '').substring(0, 150) + '(...)');
+						phantomas.log('eval\'ed code: ' + (typeof code === 'string' ? code : '').substring(0, 150) + '(...)');
 					});
 
 					// spy calls to setTimeout / setInterval with string passed instead of a function
