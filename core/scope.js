@@ -154,6 +154,8 @@
 				return false;
 			}
 
+			phantomas.log('Adding spy on "' + fn + '"...');
+
 			obj[fn] = function() {
 				if (enabled) callback.apply(this, arguments);
 				return origFn.apply(this, arguments);
