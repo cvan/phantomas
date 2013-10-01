@@ -5,7 +5,12 @@ var vows = require('vows'),
 	assert = require('assert'),
 	mock = require('./mock');
 
-function sendReq(url) {
+var DEFAULT_URL = 'http://example.com';
+
+function sendReq(url, req) {
+	req = req || {};
+	req.url = req.url || url || DEFAULT_URL;
+
 	return function() {
 		var phantomas = mock.initCoreModule('requestsMonitor'),
 			ret = false;
@@ -13,16 +18,14 @@ function sendReq(url) {
 		phantomas.on('send', function(entry, res) {
 			ret = entry;
 		});
-		phantomas.sendRequest({
-			url: url
-		});
+		phantomas.sendRequest(req);
 		return ret;
 	};
 }
 
 function recvReq(url, req, ev) {
 	req = req || {};
-	req.url = req.url || url;
+	req.url = req.url || url || DEFAULT_URL;
 
 	return function() {
 		var phantomas = mock.initCoreModule('requestsMonitor'),
@@ -101,6 +104,33 @@ vows.describe('requestMonitor').addBatch({
 		'isSSL is not set': assertField('isSSL', undefined),
 		'isBase64 is set': assertField('isBase64', true)
 	},
+	// cookies handling
+	'when cookie is sent': {
+		topic: sendReq(false, {headers: [{
+			'name': 'Cookie',
+			'value': 'foo=bar'
+		}]}),
+		'hasCookie field should be set': function(entry) {
+			assert.isTrue(entry.hasCookie);
+		},
+		'hasCookieSent field should be set': function(entry) {
+			assert.isTrue(entry.hasCookieSent);
+			assert.isTrue(!entry.hasCookieRecv);
+		}
+	},
+	'when cookie is received': {
+		topic: recvReq(false, {headers: [{
+			'name': 'Set-Cookie',
+			'value': 'foo=bar'
+		}]}),
+		'hasCookie field should be set': function(entry) {
+			assert.isTrue(entry.hasCookie);
+		},
+		'hasCookieRecv field should be set': function(entry) {
+			assert.isTrue(entry.hasCookieRecv);
+			assert.isTrue(!entry.hasCookieSent);
+		}
+	}
 }).addBatch({
 	'HTML is properly detected': {
 		topic: recvContentType('text/html'),

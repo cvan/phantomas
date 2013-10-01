@@ -18,11 +18,26 @@ exports.module = function(phantomas) {
 		// console.log(JSON.stringify(entry));
 		var isContent = entry.status === 200;
 
-		// check for query string -> foo.css?123
 		if (entry.isImage || entry.isJS || entry.isCSS) {
+			// check for query string -> foo.css?123
 			if (entry.url.indexOf('?') > -1) {
 				phantomas.log('Query string: <' + entry.url + '> (' + entry.type.toUpperCase() + ') served with query string');
 				phantomas.incrMetric('assetsWithQueryString');
+			}
+
+			// count number of requests to each asset
+			// TODO: implement phantomas.collection
+			if (typeof assetsReqCounter[entry.url] === 'undefined') {
+				assetsReqCounter[entry.url] = 1;
+			}
+			else {
+				assetsReqCounter[entry.url]++;
+			}
+
+			// static assets fetched from domains with cookie set (#92)
+			if (entry.hasCookieSent) {
+				phantomas.log(entry);
+				phantomas.log('Cookie: set for static asset - <%s> (%s)', entry.url, (entry.headers && entry.headers.Cookie) || 'n/a');
 			}
 		}
 
@@ -39,16 +54,6 @@ exports.module = function(phantomas) {
 			if (entry.bodySize < BASE64_SIZE_THRESHOLD) {
 				phantomas.log('base64: <' + entry.url + '> (' + (entry.bodySize/1024).toFixed(2) + ' kB) should be considered to be served base64-encoded');
 				phantomas.incrMetric('smallImages');
-			}
-		}
-
-		// count number of requests to each asset
-		if (entry.isImage || entry.isJS || entry.isCSS) {
-			if (typeof assetsReqCounter[entry.url] === 'undefined') {
-				assetsReqCounter[entry.url] = 1;
-			}
-			else {
-				assetsReqCounter[entry.url]++;
 			}
 		}
 	});

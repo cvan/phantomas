@@ -80,6 +80,12 @@ exports.module = function(phantomas) {
 						entry.isAjax = true;
 					}
 					break;
+
+				// cookies sent
+				case 'cookie':
+					entry.hasCookie = true;
+					entry.hasCookieSent = true;
+					break;
 			}
 		});
 
@@ -226,6 +232,12 @@ exports.module = function(phantomas) {
 							if (header.value === 'gzip') {
 								entry.gzip = true;
 							}
+							break;
+
+						// cookie received
+						case 'set-cookie':
+							entry.hasCookie = true;
+							entry.hasCookieRecv = true;
 							break;
 					}
 				});
