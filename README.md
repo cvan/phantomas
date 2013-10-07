@@ -79,7 +79,8 @@ phantomas --url https://github.com/macbre/phantomas --verbose --no-externals --a
 * `--no-externals` block requests to 3rd party domains
 * `--allow-domain=[domain],[domain]` allow requests to given domai(s) - aka whitelist
 * `--block-domain=[domain],[domain]` disallow requests to given domai(s) - aka blacklist
-* `--analyze-css` emit in-depth CSS metrics
+* `--analyze-css` emit in-depth CSS metrics **experimental**
+* `--film-strip` register film strip when page is loading (PNG files will be saved in ``./filmstrip`` directory) **experimental**
 
 ### Multiple runs
 
@@ -107,7 +108,7 @@ This helper script requires NodeJS.
 
 ## Metrics
 
-_Current number of metrics: 90_
+_Current number of metrics: 92_
 
 Units:
 
@@ -180,8 +181,10 @@ phantomas metrics for <https://github.com/macbre/phantomas>:
 * timeToFirstCss: 1069
 * timeToFirstJs: 1407
 * timeToFirstImage: 1994
-* onDOMReadyTime: 204
-* windowOnLoadTime: 5526
+* onDOMReadyTime: 194
+* onDOMReadyTimeEnd: 430
+* windowOnLoadTime: 2176
+* windowOnLoadTimeEnd: 2177
 * httpTrafficCompleted: 7089
 * windowAlerts: 0
 * windowConfirms: 0
@@ -307,8 +310,12 @@ _Metrics are calculated based on ``X-Cache`` header added by Varnish  / Squid se
 
 ### Window performance
 
+> See [NavigationTiming spec](http://w3c-test.org/webperf/specs/NavigationTiming/) for more information
+
 * onDOMReadyTime: time it took to fire onDOMready event
+* onDOMReadyTimeEnd: time it took to finish processing onDOMready event
 * windowOnLoadTime: time it took to fire window.load event
+* windowOnLoadTimeEnd: time it took to finish processing window.load event
 
 ### Requests statistics
 
