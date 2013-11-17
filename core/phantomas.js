@@ -162,6 +162,14 @@ phantomas.prototype = {
 	metrics: {},
 	notices: [],
 
+	// simple version of jQuery.proxy
+	proxy: function(fn, scope) {
+		scope = scope || this;
+		return function () {
+			return fn.apply(scope, arguments);
+		};
+	},
+
 	// emit given event
 	emit: function(/* eventName, arg1, arg2, ... */) {
 		this.log('Event ' + arguments[0] + ' emitted');
@@ -383,33 +391,33 @@ phantomas.prototype = {
 		this.log('Viewport set to ' + this.page.viewportSize.height + 'x' + this.page.viewportSize.width);
 
 		// bind basic events
-		this.page.onInitialized = this.onInitialized.bind(this);
-		this.page.onLoadStarted = this.onLoadStarted.bind(this);
-		this.page.onLoadFinished = this.onLoadFinished.bind(this);
-		this.page.onResourceRequested = this.onResourceRequested.bind(this);
-		this.page.onResourceReceived = this.onResourceReceived.bind(this);
+		this.page.onInitialized = this.proxy(this.onInitialized);
+		this.page.onLoadStarted = this.proxy(this.onLoadStarted);
+		this.page.onLoadFinished = this.proxy(this.onLoadFinished);
+		this.page.onResourceRequested = this.proxy(this.onResourceRequested);
+		this.page.onResourceReceived = this.proxy(this.onResourceReceived);
 
 		// debug
-		this.page.onAlert = this.onAlert.bind(this);
-		this.page.onConfirm = this.onConfirm.bind(this);
-		this.page.onPrompt = this.onPrompt.bind(this);
-		this.page.onConsoleMessage = this.onConsoleMessage.bind(this);
-		this.page.onCallback = this.onCallback.bind(this);
-		this.page.onError = this.onError.bind(this);
+		this.page.onAlert = this.proxy(this.onAlert);
+		this.page.onConfirm = this.proxy(this.onConfirm);
+		this.page.onPrompt = this.proxy(this.onPrompt);
+		this.page.onConsoleMessage = this.proxy(this.onConsoleMessage);
+		this.page.onCallback = this.proxy(this.onCallback);
+		this.page.onError = this.proxy(this.onError);
 
 		// observe HTTP requests
 		// finish when the last request is completed
 
 		// update HTTP requests counter
-		this.on('send', function(entry) {
+		this.on('send', this.proxy(function(entry) {
 			this.currentRequests++;
-		});
+		}));
 
-		this.on('recv', function(entry) {
+		this.on('recv', this.proxy(function(entry) {
 			this.currentRequests--;
 
 			this.enqueueReport();
-		});
+		}));
 
 		// last time changes?
 		this.emit('pageBeforeOpen', this.page);
