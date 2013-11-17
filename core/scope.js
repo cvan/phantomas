@@ -148,7 +148,7 @@
 	 *
 	 * Example:
 	 *
-	 *   window.__phantomas.proxy(window.document, 'getElementById', function() {
+	 *   window.__phantomas.spy(Document.prototype, 'getElementById', function(id) {
 	 *     // ...
 	 *   });
 	 */
